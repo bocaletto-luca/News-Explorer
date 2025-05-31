@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <!-- EN: Ensure proper scaling on mobile devices // IT: Assicura una corretta visualizzazione su dispositivi mobili -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aggregatore di Notizie</title>
+  
+  <!-- EN: Include Bootstrap CSS for responsive design // IT: Includi Bootstrap CSS per un design responsive -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  
+  <style>
+    /* EN: Basic styling for body and container // IT: Stili base per il body e il container */
+    body {
+      background-color: #f8f9fa;
+      padding-top: 40px;
+      padding-bottom: 80px; /* EN: Reserve space for the fixed footer // IT: Riserva spazio per il footer fisso */
+    }
+    .container {
+      max-width: 1200px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    /* EN: Styling for the filter form // IT: Stile per il form di filtraggio */
+    #filterForm {
+      margin-bottom: 30px;
+    }
+    /* EN: Styling for the news feed // IT: Stile per il feed delle notizie */
+    #newsFeed {
+      margin-top: 20px;
+    }
+    .news-card {
+      margin-bottom: 30px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .news-card img {
+      object-fit: cover;
+      width: 100%;
+      height: 200px;
+    }
+    /* EN: Fixed footer styling // IT: Stile per il footer fisso */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #343a40;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- EN: Page Title // IT: Titolo della pagina -->
+    <h1>Aggregatore di Notizie</h1>
+    
+    <!-- EN: Filter form for selecting category // IT: Form di filtraggio per selezionare la categoria -->
+    <form id="filterForm" class="row g-3">
+      <div class="col-md-4">
+        <label for="categorySelect" class="form-label">Seleziona Categoria:</label>
+        <!-- EN: Dropdown options: All, Technology, Sports, Politics, Entertainment // IT: Opzioni: Tutte, Tecnologia, Sport, Politica, Intrattenimento -->
+        <select id="categorySelect" class="form-select">
+          <option value="all">Tutte</option>
+          <option value="technology">Tecnologia</option>
+          <option value="sport">Sport</option>
+          <option value="politics">Politica</option>
+          <option value="film">Intrattenimento</option>
+        </select>
+      </div>
+      <div class="col-md-4 align-self-end">
+        <button type="submit" class="btn btn-primary">Aggiorna Notizie</button>
+      </div>
+    </form>
+    
+    <!-- EN: Container where news articles will be displayed // IT: Contenitore dove saranno visualizzate le notizie -->
+    <div id="newsFeed" class="row"></div>
+  </div>
+  
+  <!-- EN: Fixed Footer // IT: Footer fisso -->
+  <footer>
+    Aggregatore di Notizie - Bocaletto Luca
+  </footer>
+  
+  <!-- EN: Include Bootstrap Bundle with Popper // IT: Includi Bootstrap Bundle JS (include Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    /********************************************************************************************
+     * EN: News Aggregator App
+     * IT: Aggregatore di Notizie
+     * -----------------------------------------------------------------------------------------
+     * EN: This app aggregates the latest news headlines using The Guardian Open Platform.
+     *     It uses the free "test" API key to fetch data. Users can filter news by category:
+     *     All, Technology, Sports, Politics, and Entertainment (mapped to "film").
+     *     Each news article is displayed as a Bootstrap card with a thumbnail, headline,
+     *     a brief trail text, and a "Read More" button that opens the full article.
+     *
+     * IT: Questa app aggrega gli ultimi titoli di notizie utilizzando The Guardian Open Platform.
+     *     Viene usata la chiave API gratuita "test" per ottenere i dati. Gli utenti possono filtrare
+     *     le notizie per categoria: Tutte, Tecnologia, Sport, Politica e Intrattenimento (mappato su "film").
+     *     Ogni articolo viene visualizzato come una card Bootstrap con una miniatura, il titolo,
+     *     un breve estratto e un pulsante "Leggi di più" che apre l'articolo completo.
+     ********************************************************************************************/
+    
+    // EN: Select DOM elements // IT: Seleziona gli elementi DOM
+    const filterForm = document.getElementById("filterForm");
+    const categorySelect = document.getElementById("categorySelect");
+    const newsFeed = document.getElementById("newsFeed");
+    
+    /**
+     * EN: Build the API URL for The Guardian based on the selected category.
+     * IT: Costruisce l'URL dell'API di The Guardian in base alla categoria selezionata.
+     * @param {string} category - The selected category (e.g., all, technology, sport, politics, film)
+     *                           / La categoria selezionata.
+     * @returns {string} The URL for fetching news.
+     */
+    function buildApiUrl(category) {
+      const baseUrl = "https://content.guardianapis.com/search";
+      const apiKey = "test"; // EN: Free API key for testing; replace with your key for production / IT: Chiave API "test" gratuita; sostituisci con la tua per produzione.
+      const additionalParams = "&show-fields=thumbnail,trailText&page-size=12";
+      
+      // EN: If category is "all", no section filter is applied; otherwise, pass the section parameter.
+      // IT: Se la categoria è "all", non viene applicato alcun filtro; altrimenti, viene passato il parametro section.
+      let sectionParam = "";
+      if (category !== "all") {
+        sectionParam = "&section=" + category;
+      }
+      
+      return `${baseUrl}?api-key=${apiKey}${sectionParam}${additionalParams}`;
+    }
+    
+    /**
+     * EN: Fetch news data from The Guardian API.
+     * IT: Scarica i dati delle notizie dall'API di The Guardian.
+     * @param {string} url - The API URL.
+     * @returns {Promise<Object>} The parsed JSON data.
+     */
+    async function fetchNews(url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Network response not OK: " + response.status);
+        }
+        const json = await response.json();
+        return json;
+      } catch (error) {
+        console.error("Error fetching news:", error);
+        return null;
+      }
+    }
+    
+    /**
+     * EN: Display news articles as Bootstrap cards in the news feed.
+     * IT: Visualizza gli articoli di notizie come card Bootstrap nel feed.
+     * @param {Object} data - The JSON data from The Guardian API.
+     */
+    function displayNews(data) {
+      newsFeed.innerHTML = "";
+      
+      // EN: Check that we have valid data // IT: Verifica la validità dei dati
+      if (!data || !data.response || !data.response.results) {
+        newsFeed.innerHTML = "<p class='text-center text-danger'>Nessun dato disponibile.</p>";
+        return;
+      }
+      
+      const results = data.response.results;
+      
+      results.forEach(article => {
+        const colDiv = document.createElement("div");
+        colDiv.className = "col-12 col-md-6 col-lg-4";
+        
+        // Create card element
+        const card = document.createElement("div");
+        card.className = "card news-card h-100";
+        
+        // EN: Add thumbnail image if available // IT: Aggiungi l'immagine del thumbnail se disponibile
+        if (article.fields && article.fields.thumbnail) {
+          const img = document.createElement("img");
+          img.src = article.fields.thumbnail;
+          img.alt = article.webTitle;
+          img.className = "card-img-top";
+          card.appendChild(img);
+        }
+        
+        // EN: Create card body // IT: Crea il corpo della card
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body d-flex flex-column";
+        
+        // EN: Article headline // IT: Titolo dell'articolo
+        const title = document.createElement("h5");
+        title.className = "card-title";
+        title.textContent = article.webTitle;
+        cardBody.appendChild(title);
+        
+        // EN: Article trail text (brief summary), if available // IT: Estratto dell'articolo (breve riassunto), se disponibile
+        if (article.fields && article.fields.trailText) {
+          const trailText = document.createElement("p");
+          trailText.className = "card-text";
+          trailText.innerHTML = article.fields.trailText;
+          cardBody.appendChild(trailText);
+        }
+        
+        // EN: "Read More" button to open the full article // IT: Pulsante "Leggi di più" per aprire l'articolo completo
+        const readMore = document.createElement("a");
+        readMore.className = "btn btn-sm btn-primary mt-auto";
+        readMore.href = article.webUrl;
+        readMore.target = "_blank";
+        readMore.textContent = "Leggi di più";
+        cardBody.appendChild(readMore);
+        
+        card.appendChild(cardBody);
+        colDiv.appendChild(card);
+        newsFeed.appendChild(colDiv);
+      });
+    }
+    
+    /**
+     * EN: Load news based on the selected category.
+     * IT: Carica le notizie in base alla categoria selezionata.
+     */
+    async function loadNews() {
+      const selectedCategory = categorySelect.value;
+      const url = buildApiUrl(selectedCategory);
+      // EN: Show loading message // IT: Mostra un messaggio di caricamento
+      newsFeed.innerHTML = "<p class='text-center'>Caricamento notizie...</p>";
+      
+      const data = await fetchNews(url);
+      if (data) {
+        displayNews(data);
+      } else {
+        newsFeed.innerHTML = "<p class='text-center text-danger'>Errore nel caricamento delle notizie. Riprova più tardi.</p>";
+      }
+    }
+    
+    // EN: Add event listener for form submission // IT: Aggiungi un event listener al submit del form
+    filterForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+      loadNews();
+    });
+    
+    // EN: Load news on initial page load (default: All categories) // IT: Carica le notizie al caricamento iniziale della pagina (categoria: Tutte)
+    loadNews();
+  </script>
+</body>
+</html>
