@@ -1,0 +1,47 @@
+ /* EN: Basic styling for body and container 
+         IT: Stili di base per il body e il container */
+    body {
+      background-color: #f8f9fa;
+      padding-top: 40px;
+      padding-bottom: 120px; /* Extra space for pagination & fixed footer / Spazio extra per paginazione e footer fisso */
+    }
+    .container {
+      max-width: 1200px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    /* EN: Styling for the filter form // IT: Stile per il form di filtraggio */
+    #filterForm {
+      margin-bottom: 30px;
+    }
+    /* EN: Styling for the news feed // IT: Stile per il feed delle notizie */
+    #newsFeed {
+      margin-top: 20px;
+    }
+    .news-card {
+      margin-bottom: 30px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .news-card img {
+      object-fit: cover;
+      width: 100%;
+      height: 200px;
+    }
+    /* EN: Styling for the pagination container // IT: Stile per il contenitore di paginazione */
+    #paginationContainer {
+      margin-top: 20px;
+    }
+    /* EN: Fixed footer styling // IT: Stile per il footer fisso */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #343a40;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 0.9rem;
+    }
