@@ -9,6 +9,8 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![API](https://img.shields.io/badge/API-Free%20Open%20Data-9cf?style=flat-square&logo=news)
 
+[![Online Demo](https://img.shields.io/badge/Online-Demo-blue?style=for-the-badge&logo=google-chrome&logoColor=white)](https://bocaletto-luca.github.io/News-Explorer/)
+
 ## 📌 Overview  
 
 **News Explorer** is a **fast, interactive web application** designed to help users **discover and explore news articles** from various sources using **free open-data APIs**.  
